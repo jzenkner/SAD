@@ -1,0 +1,21 @@
+# Generated data, checkpoints and logs (see README).
+generated_data/
+results/
+llm_cache/
+plots/
+slurm_logs/
+*.out
+*tfevents*
+
+# Downloaded or derived datasets placed inside data/.
+data/llm_data/
+data/test_data/
+data/rules_bigbench.csv
+
+# Python / editors.
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store

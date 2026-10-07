@@ -1,0 +1,8 @@
+# LLM experiments (SFT, SAD and evaluation of Llama-3.1-8B LoRA adapters).
+# build_sft_data.py reuses the TFRecord pipeline, so this needs the JAX/TF
+# stack as well.
+-r requirements.txt
+torch==2.4.1
+transformers==4.45.2
+peft==0.13.2
+accelerate==1.10.1

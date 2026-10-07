@@ -1,0 +1,15 @@
+# Transformer experiments (data generation, SAD training, evaluation).
+# Python 3.9; versions are the ones the paper's runs used.
+jax[cuda12]==0.4.30
+flax==0.8.5
+optax==0.2.3
+orbax-checkpoint==0.6.4
+chex==0.1.87
+tensorflow==2.17.0
+tensorflow-io-gcs-filesystem==0.37.1
+absl-py==2.1.0
+numpy==1.26.4
+pandas==2.2.3
+tqdm==4.67.1
+# Only for the few-shot prompting baseline (run_llm.sh).
+ollama==0.5.1
