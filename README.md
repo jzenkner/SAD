@@ -241,7 +241,7 @@ python -m tasks.deepcoder.deepcoder_dsl_test
 python -m spec_decomposition.llm_finetune.prompts_test
 ```
 
-## Acknowledgements and license
+## Acknowledgments
 
 This code builds on [ExeDec](https://github.com/google-deepmind/exedec)
 (Shi et al., ICLR 2024). Files that carry the DeepMind copyright header are
