@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAD - Solver-Aware Decompositions for PBE</title>
+  <title>SAD - Solver-Aware Decompositions for Programming-by-Example (NeurIPS 2026)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
   <style>
@@ -223,7 +223,7 @@
     /* ── STATS ── */
     .dual-stat {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 1.2rem;
       margin: 2rem 0;
     }
@@ -422,6 +422,23 @@
 
     .bar-sad   { background: var(--accent); color: var(--surface); }
     .bar-blind { background: var(--muted); color: var(--surface); }
+    .bar-exedec { background: var(--surface2); color: var(--surface); }
+
+    .authors {
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+      opacity: 0;
+      animation: fadeUp .6s .28s forwards;
+    }
+    .authors a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--muted); }
+    .affiliation {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: fadeUp .6s .3s forwards;
+    }
 
     /* ── DOMAINS ── */
     .domain-grid {
@@ -540,7 +557,7 @@
 <body>
 
 <nav>
-  <span class="nav-logo">SAD · Neurips 2026</span>
+  <span class="nav-logo">SAD · NeurIPS 2026</span>
   <ul class="nav-links">
     <li><a href="#abstract">Abstract</a></li>
     <li><a href="#method">Method</a></li>
@@ -554,17 +571,21 @@
 <section id="hero">
   <div class="wrapper">
     <div class="venue-row">
-      <span class="venue-tag">NeurIPS 2026 (Poster)</span>
-      <a href="https://arxiv.org/abs/2608.03461" class="arxiv-tag" target="_blank" rel="noopener">arXiv Preprint ↗</a>
+      <span class="venue-tag">NeurIPS 2026 · Sydney</span>
+      <a href="https://arxiv.org/abs/2608.03461" class="arxiv-tag" target="_blank" rel="noopener">arXiv ↗</a>
     </div>
     <h1 class="hero-title">
-      <em>Solver-Aware Decompositions</em><br/>for Programming by Example
+      <em>Solver-Aware Decompositions</em><br/>for Programming-by-Example
     </h1>
+    <p class="authors">
+      <a href="mailto:janis.zenkner@tu-clausthal.de">Janis Zenkner</a> · Tobias Sesterhenn · Tim Grams · Christian Bartelt
+    </p>
+    <p class="affiliation">Clausthal University of Technology, Clausthal-Zellerfeld, Germany</p>
     <p class="hero-sub">
-      When Dividing Requires Knowing How to Conquer - aligning decomposition structure with a bounded synthesizer's tractable distribution, rather than imitating annotator factorisation choices.
+      When Dividing Requires Knowing how to Conquer - aligning decomposition structure with a bounded synthesizer's tractable distribution, rather than imitating the annotator's factorization choices.
     </p>
     <div class="hero-actions">
-      <a href="https://arxiv.org/abs/2608.03461" class="btn btn-primary" target="_blank" rel="noopener">📄 Read on arXiv</a>
+      <a href="https://arxiv.org/abs/2608.03461" class="btn btn-primary" target="_blank" rel="noopener">📄 Read the Paper</a>
       <a href="https://github.com/jzenkner/SAD" class="btn btn-outline" target="_blank" rel="noopener">💻 Code on GitHub</a>
     </div>
   </div>
@@ -576,10 +597,10 @@
     <div class="section-tag">Overview</div>
     <h2>Decomposition Quality Is Solver-Relative</h2>
     <p>
-      Decomposition-based <abbr title="Programming by Example">PBE</abbr> scales synthesis by splitting tasks into subtasks - a decomposer predicts intermediate subgoals, and a synthesizer generates programs conditioned on them. Standard training optimises the decomposer to imitate ground-truth (GT) subgoals, treating decomposition quality as intrinsic to the task structure.
+      Decomposition-based <abbr title="Programming by Example">PBE</abbr> scales synthesis by splitting tasks into subtasks - a decomposer predicts intermediate subgoals, and a synthesizer generates programs conditioned on them. Execution-decomposition approaches such as ExeDec train the decomposer to imitate ground-truth (GT) subgoals, implicitly treating decomposition quality as intrinsic to the task.
     </p>
     <p>
-      We argue this framing is incomplete. A bounded synthesizer develops its own search dynamics and inductive biases - it does not become a faithful replica of the annotator's decomposition choices. Subgoals that are structurally valid can fall outside the synthesizer's tractable distribution, causing synthesis failures that imitation-only training cannot correct.
+      We challenge this assumption. For bounded solvers with fixed inductive biases, GT decompositions reflect the annotator's factorization choices - not the solver's search dynamics. A decomposer trained to match GT decompositions may therefore propose subgoals that are logically valid yet intractable for the solver, and imitation-only training has no mechanism to correct this.
     </p>
 
     <div class="callout reveal">
@@ -588,19 +609,27 @@
     </div>
 
     <p>
-      We propose <strong>Solver-Aware Decomposition (SAD)</strong>, which retains supervised training on GT subgoals as a structural scaffold while additionally optimising the decomposer via direct feedback from a frozen synthesizer. Subgoals are rewarded based on the synthesizer's loss on the target program - a dense signal of subtask difficulty that steers the decomposer toward the solver's tractable region.
+      We propose <strong>Solver-Aware Decomposition (SAD)</strong>, a training framework that retains supervised training on GT subgoals as a structural scaffold, while additionally optimizing the decomposer online with policy gradients against a frozen learned synthesizer. Each sampled subgoal is rewarded by the synthesizer's cross-entropy loss on the target program - a continuous signal of subtask difficulty that encourages decompositions the solver can act on.
+    </p>
+    <p>
+      Our experiments reveal an <em>accuracy paradox</em>: higher agreement with GT decompositions does not improve synthesis success - even though the synthesizer was trained on the very same GT data the decomposer is optimized to mimic. SAD instead learns decompositions that trade GT alignment for solver tractability, yielding consistent gains in synthesis and end-to-end task accuracy across two PBE domains and under zero-shot transfer to an external list-processing benchmark. Moreover, SAD solves tasks that a GT decomposition oracle fails - empirical evidence, under an identical synthesizer and search procedure, that GT decompositions are not universally optimal for bounded solvers.
     </p>
 
     <div class="dual-stat reveal">
       <div class="stat-card">
         <div class="stat-number">+22%</div>
-        <div class="stat-label">relative gain on Deepcoder length generalisation</div>
+        <div class="stat-label">relative gain on Deepcoder length generalization</div>
         <div class="stat-sub">SAD vs. solver-blind baseline</div>
       </div>
       <div class="stat-card amber">
         <div class="stat-number">2-3×</div>
         <div class="stat-label">higher GT alignment from solver-blind training</div>
         <div class="stat-sub">yet consistently lower synthesis accuracy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">42.3%</div>
+        <div class="stat-label">zero-shot on the Rule et al. benchmark</div>
+        <div class="stat-sub">vs. 33.0% for solver-blind</div>
       </div>
     </div>
   </div>
@@ -653,6 +682,10 @@
       </div>
     </div>
 
+    <p>
+      The synthesizer is trained once with teacher forcing on the <em>full current task</em> specification to predict the next GT subprogram, then frozen. Unlike ExeDec's synthesizer, which is trained on GT subtasks, it must infer which subtask comes next as well as how to implement it - this is what lets it give meaningful feedback on decompositions that deviate from the GT trajectory. At inference, it receives the subtask induced by the predicted subgoal, exactly as in ExeDec. Freezing the synthesizer is a deliberate isolation choice: any improvement in task success is attributable solely to the decomposer.
+    </p>
+
     <p>The training objective combines a supervised scaffold with the RL signal and an entropy bonus to prevent collapse:</p>
 
     <div class="eq reveal">
@@ -687,7 +720,10 @@
     <div class="section-tag">Evaluation</div>
     <h2>Results</h2>
     <p>
-      SAD consistently outperforms the solver-blind baseline across both domains and evaluation settings. All SAD vs. solver-blind differences are statistically significant (paired t-test, p &lt; 0.05). SAD also improves over ExeDec in both domains.
+      SAD consistently outperforms the solver-blind baseline across both domains and evaluation settings. All SAD vs. solver-blind differences are statistically significant (paired t-test, p &lt; 0.05). SAD also improves over ExeDec in both domains. The relative advantage over solver-blind is larger under length generalization than in-distribution: 22.2% vs. 10.7% on Deepcoder, and 14.0% vs. 10.9% on Lambdabeam.
+    </p>
+    <p style="font-size:0.88rem; color:var(--muted);">
+      Three methods are compared. <strong>ExeDec</strong>: GT-subtask-trained synthesizer, GT-supervised decomposer. <strong>Solver-blind</strong>: full-task-trained synthesizer, GT-supervised decomposer (ExeDec with SAD's synthesizer). <strong>SAD</strong>: full-task-trained synthesizer, GT supervision plus solver-aware SCST. All causal claims rest on the SAD vs. solver-blind comparison, which shares architecture, synthesizer weights, search configuration and training data.
     </p>
 
     <div class="chart-section reveal">
@@ -702,12 +738,20 @@
           <div class="bar-track"><div class="bar-fill bar-blind" data-pct="67" style="width:0%">67%</div></div>
         </div>
         <div class="bar-row">
+          <div class="bar-label">ExeDec (in-dist.)</div>
+          <div class="bar-track"><div class="bar-fill bar-exedec" data-pct="70" style="width:0%">70%</div></div>
+        </div>
+        <div class="bar-row">
           <div class="bar-label">SAD (length gen.)</div>
           <div class="bar-track"><div class="bar-fill bar-sad" data-pct="41" style="width:0%">41%</div></div>
         </div>
         <div class="bar-row">
           <div class="bar-label">Solver-blind (length gen.)</div>
           <div class="bar-track"><div class="bar-fill bar-blind" data-pct="33" style="width:0%">33%</div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">ExeDec (length gen.)</div>
+          <div class="bar-track"><div class="bar-fill bar-exedec" data-pct="28" style="width:0%">28%</div></div>
         </div>
       </div>
     </div>
@@ -724,6 +768,10 @@
           <div class="bar-track"><div class="bar-fill bar-blind" data-pct="59" style="width:0%">59%</div></div>
         </div>
         <div class="bar-row">
+          <div class="bar-label">ExeDec (in-dist.)</div>
+          <div class="bar-track"><div class="bar-fill bar-exedec" data-pct="51" style="width:0%">51%</div></div>
+        </div>
+        <div class="bar-row">
           <div class="bar-label">SAD (length gen.)</div>
           <div class="bar-track"><div class="bar-fill bar-sad" data-pct="32" style="width:0%">32%</div></div>
         </div>
@@ -731,11 +779,15 @@
           <div class="bar-label">Solver-blind (length gen.)</div>
           <div class="bar-track"><div class="bar-fill bar-blind" data-pct="28" style="width:0%">28%</div></div>
         </div>
+        <div class="bar-row">
+          <div class="bar-label">ExeDec (length gen.)</div>
+          <div class="bar-track"><div class="bar-fill bar-exedec" data-pct="14" style="width:0%">14%</div></div>
+        </div>
       </div>
     </div>
 
     <h3 style="margin:2.5rem 0 0.8rem; font-size:1.2rem;">The Accuracy Paradox</h3>
-    <p>A key finding is that higher GT decomposition alignment does <em>not</em> translate into synthesis success. SAD achieves consistently higher synthesis accuracy despite matching GT subgoals 2–3× less often than the solver-blind baseline - confirming that GT alignment is a poor proxy for solver utility.</p>
+    <p>A key finding is that higher GT decomposition alignment does <em>not</em> translate into synthesis success. Measured single-step under teacher forcing, SAD achieves consistently higher synthesis accuracy despite matching GT subgoals 2–3× less often than the solver-blind baseline - confirming that GT alignment is a poor proxy for solver utility.</p>
 
     <div class="results-table-wrap reveal">
       <table>
@@ -793,18 +845,36 @@
       <div class="card">
         <div class="card-num">⊕</div>
         <h3>Coverage, Not Ranking</h3>
-        <p>Beam oracle analysis confirms the gap is generative - the solver-blind model fails to propose tractable decompositions at all, not merely rank existing ones poorly.</p>
+        <p>Beam oracle gains are below 2% in all settings, and the solver-blind beam oracle stays below SAD's raw performance - the gap is generative, not a ranking problem.</p>
       </div>
       <div class="card">
         <div class="card-num">∅</div>
         <h3>Robustfill Null Result</h3>
-        <p>Where decomposition order is structurally fixed and ambiguity is absent, SAD matches the solver-blind baseline exactly - a designed falsifiability check that confirms the mechanism.</p>
+        <p>Where decomposition order is structurally fixed and ambiguity is absent, SAD matches the solver-blind baseline (94.1% / 90.8% for both, in-dist. / length gen.) - a designed falsifiability check that confirms the mechanism.</p>
       </div>
     </div>
 
     <div class="callout green reveal" style="margin-top:2.2rem;">
       <div class="callout-label">Solver-Relative Diversity</div>
-      <p>SAD solves a consistent subset of tasks that the GT decomposition oracle cannot - using genuinely alternative programs (fewer than 2% overlap with GT solutions, differing systematically in length and DSL primitive usage). This confirms that decomposition quality is solver-relative: the synthesizer's inductive bias, not the annotator's choices, should determine what constitutes a good intermediate subgoal.</p>
+      <p>The GT decomposition oracle (GT subgoals at inference, same synthesizer and beam size) remains an approximate ceiling overall - 94.7% / 79.8% on Deepcoder and 89.6% / 51.3% on Lambdabeam (in-dist. / length gen.). Yet SAD solves a consistent subset of tasks the oracle cannot: 63.2 ± 6.7 on Deepcoder and 109.8 ± 18.3 on Lambdabeam (out of 2 × 1000 tasks per seed). These are genuinely alternative programs - fewer than 2% match the GT program, and they differ systematically in length and DSL primitive usage. GT decompositions are not universally optimal for a bounded synthesizer.</p>
+    </div>
+
+    <div class="cards reveal">
+      <div class="card">
+        <div class="card-num">→</div>
+        <h3>Zero-Shot Transfer</h3>
+        <p>Without retraining, the Lambdabeam-trained SAD model solves 42.3% ± 7.1% of 129 tasks from the external list-processing benchmark of Rule et al., against 33.0% ± 3.5% for solver-blind.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">λ</div>
+        <h3>LLM Solver (Preliminary)</h3>
+        <p>With a LoRA-fine-tuned Llama-3.1-8B as decomposer and frozen synthesizer on 200 Deepcoder tasks, SAD reaches 34.5% vs. 30.5% for an equal-budget solver-blind control (start: 28.0%). Single run.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">×</div>
+        <h3>L<sub>sup</sub> Is Necessary</h3>
+        <p>Removing supervision collapses decomposition accuracy to 2–9% and test task accuracy below 20%. L<sub>sup</sub> keeps the policy in a meaningful decomposition space; L<sub>RL</sub> navigates within it.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -836,7 +906,7 @@
 
     <div class="callout amber reveal" style="margin-top:2rem;">
       <div class="callout-label">Setup</div>
-      <p style="font-size:0.88rem; color:#3a3a36;">All models share the same Transformer architecture (3 layers, embedding dim. 512, hidden dim. 1024), beam size 10, 5 random seeds, 1 000 test tasks per seed. Evaluated under in-distribution and length generalisation (trained on lengths 1–4, tested on length 5) settings. Training on NVIDIA RTX A6000; SAD adds ~30% wall-clock time over solver-blind training due to two additional frozen synthesizer forward passes per update step.</p>
+      <p style="font-size:0.88rem; color:#3a3a36;">All models share the same Transformer architecture (3 layers, embedding dim. 512, hidden dim. 1024), beam size 10, 5 random seeds, 1 000 test tasks per seed, paired t-tests at the 5% level. Each domain is evaluated in-distribution and under length generalization (list domains: train on lengths 1–4, test on length 5; Robustfill: train on 1–6, test on 7–10). A leave-one-out protocol holds out one I/O example for evaluation; step limits are T = 10 for list domains and T = 20 for Robustfill. Lambdabeam-trained models are additionally evaluated zero-shot on 129 tasks from the Rule et al. list-processing benchmark. Training on an NVIDIA RTX A6000; SAD adds ~30% wall-clock time over solver-blind training due to two additional frozen synthesizer forward passes per update step.</p>
     </div>
   </div>
 </section>
@@ -875,7 +945,7 @@
     <div class="limitations-list reveal">
       <div class="limit-item">
         <span class="limit-icon">◦</span>
-        <span>SAD optimises the decomposer for a specific frozen synthesizer - retraining is required when the synthesizer changes.</span>
+        <span>SAD optimizes the decomposer for a specific frozen synthesizer - retraining is required when the synthesizer changes.</span>
       </div>
       <div class="limit-item">
         <span class="limit-icon">◦</span>
@@ -894,22 +964,21 @@
   <div class="wrapper">
     <div class="section-tag">Cite</div>
     <h2>Citation</h2>
-    <p style="font-size:0.88rem; color:var(--muted); margin-bottom:1.2rem;">This paper is an anonymous submission under review. A preprint is available on arXiv.</p>
+    <p style="font-size:0.88rem; color:var(--muted); margin-bottom:1.2rem;">Published at the 40th Conference on Neural Information Processing Systems (NeurIPS 2026), Sydney. If you find this work useful, please cite:</p>
 
-    <div class="citation-box reveal">@article{sad2025,
-  title   = {Solver-Aware Decompositions for Programming-by-Example:
-             When Dividing Requires Knowing how to Conquer},
-  author  = {Janis Zenkner, Tobias Sesterhenn, Tim Grams, Christian Bartelt},
-  journal = {arXiv preprint},
-  year    = {2025},
-  url     = {https://arxiv.org/abs/2608.03461}
+    <div class="citation-box reveal">@inproceedings{zenkner2026sad,
+  title     = {Solver-Aware Decompositions for Programming-by-Example:
+               When Dividing Requires Knowing how to Conquer},
+  author    = {Zenkner, Janis and Sesterhenn, Tobias and Grams, Tim and Bartelt, Christian},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026}
 }</div>
     <button class="copy-btn" onclick="copyBib()">Copy BibTeX</button>
   </div>
 </section>
 
 <footer>
-  <p>arXiv preprint · Submitted to NeurIPS 2026 · Code released upon acceptance</p>
+  <p>NeurIPS 2026 · Sydney · <a href="https://github.com/jzenkner/SAD" style="color:inherit">Code on GitHub</a></p>
 </footer>
 
 <script>
@@ -933,13 +1002,7 @@
   document.querySelectorAll('.chart-section').forEach(el => barObserver.observe(el));
 
   function copyBib() {
-    const text = `@article{sad2025,
-  title   = {Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer},
-  author  = {Anonymous Author(s)},
-  journal = {arXiv preprint},
-  year    = {2025},
-  url     = {https://arxiv.org/abs/2608.03461}
-}`;
+    const text = document.querySelector('.citation-box').textContent;
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.querySelector('.copy-btn');
       btn.textContent = '✓ Copied!';
