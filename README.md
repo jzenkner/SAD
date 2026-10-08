@@ -1,7 +1,7 @@
 # Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer
 
-Code for the paper **&lt;Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer&gt;**, &lt;Janis Zenkner, Tobias Sesterhenn, Tim Grams, Christian Bartelt&gt;, &lt;NeurIPS 2026&gt;.
-[[Paper]](&lt;https://arxiv.org/abs/2608.03461&gt;)
+Code for the paper **Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer**, Zenkner et al., NeurIPS 2026.
+[Paper](https://arxiv.org/abs/2608.03461)
 
 This repository contains the code needed to reproduce the paper's experiments.
 It ships no datasets or model checkpoints. The scripts below generate the data,
