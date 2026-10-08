@@ -1,7 +1,7 @@
-# SAD: &lt;PAPER TITLE&gt;
+# Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer
 
-Code for the paper **&lt;PAPER TITLE&gt;**, &lt;AUTHORS&gt;, &lt;VENUE YEAR&gt;.
-[[Paper]](&lt;PAPER URL&gt;)
+Code for the paper **&lt;Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer&gt;**, &lt;Janis Zenkner, Tobias Sesterhenn, Tim Grams, Christian Bartelt&gt;, &lt;NeurIPS 2026&gt;.
+[[Paper]](&lt;https://arxiv.org/abs/2608.03461&gt;)
 
 This repository contains the code needed to reproduce the paper's experiments.
 It ships no datasets or model checkpoints. The scripts below generate the data,
@@ -247,10 +247,14 @@ This code builds on [ExeDec](https://github.com/google-deepmind/exedec)
 (Shi et al., ICLR 2024). Files that carry the DeepMind copyright header are
 derived from ExeDec and were modified for this work. The LambdaBeam DSL follows
 [LambdaBeam](https://arxiv.org/abs/2306.02049) (Shi et al., NeurIPS 2023).
-Released under the Apache License 2.0 (see `LICENSE`).
 
 ## Citation
 
 ```bibtex
-<BIBTEX>
+@article{zenkner2026solver,
+  title={Solver-Aware Decompositions for Programming-by-Example: When Dividing Requires Knowing how to Conquer},
+  author={Zenkner, Janis and Sesterhenn, Tobias and Grams, Tim and Bartelt, Christian},
+  journal={arXiv preprint arXiv:2608.03461},
+  year={2026}
+}
 ```
